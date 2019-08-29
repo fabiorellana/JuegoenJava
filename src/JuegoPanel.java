@@ -6,6 +6,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
 import javax.swing.JPanel;
 import javax.swing.Timer;
@@ -15,7 +16,10 @@ public class JuegoPanel extends JPanel implements KeyListener {
     public Rectangle2D nave;
     public Timer t,enemigas;
     public int xNave = 240, enemigasIni=20, enemigasAumentoX=0, enemigasAumentoY=0, moviEnemigas=10;
-    public int aleatorio1, aleatorio2, contadorCaer=0;
+    public int aleatorio1, aleatorio2, contadorCaer=0, disparadas=0, contadorRecargar=0;
+    public Ellipse2D [] disparos = new Ellipse2D[20];
+    public int [] xDisparos = new int[20];
+    public int [] yDisparos = new int[20];
     public boolean derechaNave=false, izquierdaNave=true, derechaEnemigas=true, izquierdaEnemigas=false, segundaFila=false;
     public boolean caer=false;
     public Graphics2D g2;
@@ -30,6 +34,7 @@ public class JuegoPanel extends JPanel implements KeyListener {
         this.addKeyListener(this);
         timerNave();
         t.start();
+        inicializarDisparos();
         inicializarAltura();
         timerEnemigas();
         enemigas.start();
@@ -47,6 +52,12 @@ public class JuegoPanel extends JPanel implements KeyListener {
         if(yEnemigas[aleatorio1][aleatorio2] >= 550){
             caer = false;
             contadorCaer = 0;
+        }
+    }
+    
+    public void inicializarDisparos(){
+        for(int i = 0; i < 20; i++){
+            yDisparos[i] = 410;
         }
     }
     
@@ -74,6 +85,9 @@ public class JuegoPanel extends JPanel implements KeyListener {
                     xNave-=5;
                 }
                 
+                for(int i = 0; i < disparadas; i++){
+                    yDisparos[i]-=3;
+                }
                 repaint(); 
             }
         });
@@ -87,6 +101,12 @@ public class JuegoPanel extends JPanel implements KeyListener {
         
         nave = new Rectangle2D.Double(xNave, 410, 60, 90);
         g2.fill(nave);
+        
+        //Dibujar balas
+        for(int i = 0; i < disparadas; i++){
+            disparos[i] = new Ellipse2D.Double(xDisparos[i], yDisparos[i], 10, 20);
+            g2.fill(disparos[i]);
+        }
         inicializarEnemigas();
     }
     
@@ -153,6 +173,11 @@ public class JuegoPanel extends JPanel implements KeyListener {
           
         if(e.getKeyCode() == KeyEvent.VK_SPACE) {
             System.out.println("Disparar");
+            if(contadorRecargar < 20){
+                xDisparos[disparadas] = (int) nave.getCenterX();
+                disparadas++;
+                contadorRecargar++;
+            }
         }
         
         if(e.getKeyCode() == KeyEvent.VK_R) {
