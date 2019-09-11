@@ -17,9 +17,9 @@ public class JuegoPanel extends JPanel implements KeyListener {
     public Timer t,enemigas;
     public int xNave = 240, enemigasIni=20, enemigasAumentoX=0, enemigasAumentoY=0, moviEnemigas=10;
     public int aleatorio1, aleatorio2, contadorCaer=0, disparadas=0, contadorRecargar=0;
-    public Ellipse2D [] disparos = new Ellipse2D[20];
-    public int [] xDisparos = new int[20];
-    public int [] yDisparos = new int[20];
+    public Ellipse2D [] disparos = new Ellipse2D[15];
+    public int [] xDisparos = new int[15];
+    public int [] yDisparos = new int[15];
     public boolean derechaNave=false, izquierdaNave=true, derechaEnemigas=true, izquierdaEnemigas=false, segundaFila=false;
     public boolean caer=false;
     public Graphics2D g2;
@@ -56,7 +56,7 @@ public class JuegoPanel extends JPanel implements KeyListener {
     }
     
     public void inicializarDisparos(){
-        for(int i = 0; i < 20; i++){
+        for(int i = 0; i < 15; i++){
             yDisparos[i] = 410;
         }
     }
@@ -115,7 +115,7 @@ public class JuegoPanel extends JPanel implements KeyListener {
             public void actionPerformed(ActionEvent e){
                 if(derechaEnemigas){
                     moviEnemigas+=5;
-                    if(moviEnemigas >= 45){
+                    if(moviEnemigas >= 80){
                         derechaEnemigas = false;
                         izquierdaEnemigas = true;
                         contadorCaer++;
@@ -124,7 +124,7 @@ public class JuegoPanel extends JPanel implements KeyListener {
                 
                 if(izquierdaEnemigas){
                     moviEnemigas-=5;
-                    if(moviEnemigas <= 20){
+                    if(moviEnemigas <= -15){
                         derechaEnemigas = true;
                         izquierdaEnemigas = false;
                     }
@@ -132,6 +132,16 @@ public class JuegoPanel extends JPanel implements KeyListener {
                 
                 if(contadorCaer >= 3){
                     atacar();
+                }
+                
+                for(int i = 0; i < 2; i++){
+                    for(int j = 0; j < 5; j++){
+                        if(nave.intersects(navesEnemigas[i][j])){
+                            System.out.println("Has perdido!!");
+                            t.stop();
+                            enemigas.stop();
+                        }
+                    }
                 }
                 
                 repaint(); 
@@ -145,7 +155,7 @@ public class JuegoPanel extends JPanel implements KeyListener {
             
         for(int filas = 0; filas < 2; filas++){
             for(int columnas = 0; columnas < 5; columnas++){
-                navesEnemigas[filas][columnas] = new Rectangle2D.Double(enemigasIni+enemigasAumentoX+moviEnemigas, yEnemigas[filas][columnas], 60, 90);
+                navesEnemigas[filas][columnas] = new Rectangle2D.Double(enemigasIni+enemigasAumentoX+moviEnemigas, yEnemigas[filas][columnas]+10, 60, 90);
                 enemigasAumentoX+=80;
                 g2.fill(navesEnemigas[filas][columnas]);
             }
@@ -173,15 +183,16 @@ public class JuegoPanel extends JPanel implements KeyListener {
           
         if(e.getKeyCode() == KeyEvent.VK_SPACE) {
             System.out.println("Disparar");
-            if(contadorRecargar < 20){
+            if(contadorRecargar < 5){
                 xDisparos[disparadas] = (int) nave.getCenterX();
                 disparadas++;
                 contadorRecargar++;
             }
         }
         
-        if(e.getKeyCode() == KeyEvent.VK_R) {
+        if(e.getKeyCode() == KeyEvent.VK_R ) {
             System.out.println("Recargandos");
+            contadorRecargar = 0;
         }
     }
 
