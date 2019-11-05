@@ -1,5 +1,6 @@
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
@@ -86,7 +87,20 @@ public class JuegoPanel extends JPanel implements KeyListener {
                 }
                 
                 for(int i = 0; i < disparadas; i++){
-                    yDisparos[i]-=3;
+                    if(yDisparos[i] >= -20){
+                        yDisparos[i]-=3;
+                    }
+                }
+                
+                for(int i = 0; i < 2; i++){
+                    for(int j = 0; j < 5; j++){
+                        for(int k = 0; k < disparadas; k++){
+                            if(disparos[k].intersects(navesEnemigas[i][j])){
+                                yDisparos[k] = -40;
+                                yEnemigas[i][j] = 600;
+                            }
+                        }
+                    }
                 }
                 repaint(); 
             }
@@ -107,7 +121,16 @@ public class JuegoPanel extends JPanel implements KeyListener {
             disparos[i] = new Ellipse2D.Double(xDisparos[i], yDisparos[i], 10, 20);
             g2.fill(disparos[i]);
         }
+        escribir();
         inicializarEnemigas();
+    }
+    
+    public void escribir(){
+        g2.setFont(new Font("Tahoma", Font.BOLD, 16));
+        g2.drawString("Vidas:  ", 20, 20);
+        g2.drawString("Nivel:  ", 150, 20);
+        g2.drawString("Score:  ", 260, 20);
+        g2.drawString("Balas:  ", 370, 20);
     }
     
     public void timerEnemigas(){
@@ -183,7 +206,7 @@ public class JuegoPanel extends JPanel implements KeyListener {
           
         if(e.getKeyCode() == KeyEvent.VK_SPACE) {
             System.out.println("Disparar");
-            if(contadorRecargar < 5){
+            if(contadorRecargar < 5 && disparadas < 15){
                 xDisparos[disparadas] = (int) nave.getCenterX();
                 disparadas++;
                 contadorRecargar++;
