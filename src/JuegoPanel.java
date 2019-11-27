@@ -26,6 +26,8 @@ public class JuegoPanel extends JPanel implements KeyListener {
     public Graphics2D g2;
     public Rectangle2D[][] navesEnemigas = new Rectangle2D[2][5];
     public int [][]yEnemigas = new int[2][5];
+    public int vidas = 10, nivel = 1, score = 0, balas = 15;
+    public int [][] vivas = new int[2][5];
     
     public JuegoPanel(String nombre) {
         this.setBackground(Color.WHITE);
@@ -37,8 +39,17 @@ public class JuegoPanel extends JPanel implements KeyListener {
         t.start();
         inicializarDisparos();
         inicializarAltura();
+        inicializarVivas();
         timerEnemigas();
         enemigas.start();
+    }
+    
+    public void inicializarVivas(){
+        for(int i = 0; i < 2; i++){
+            for(int j = 0; j < 5; j++){
+              vivas[i][j] = 1;
+            }
+        }
     }
     
     public void atacar(){
@@ -92,19 +103,44 @@ public class JuegoPanel extends JPanel implements KeyListener {
                     }
                 }
                 
-                for(int i = 0; i < 2; i++){
-                    for(int j = 0; j < 5; j++){
-                        for(int k = 0; k < disparadas; k++){
-                            if(disparos[k].intersects(navesEnemigas[i][j])){
-                                yDisparos[k] = -40;
-                                yEnemigas[i][j] = 600;
-                            }
-                        }
-                    }
-                }
                 repaint(); 
             }
         });
+    }
+    
+    public void interseccionBalas(){
+        for(int i = 0; i < 2; i++){
+            for(int j = 0; j < 5; j++){
+                for(int k = 0; k < disparadas; k++){
+                    if(disparos[k].intersects(navesEnemigas[i][j])){
+                        yDisparos[k] = -40;
+                        yEnemigas[i][j] = 600;
+                    }
+                }
+            }
+        }
+    }
+    
+    public int revisarVivas(){
+        for(int i = 0; i < 2; i++){
+            for(int j = 0; j < 5; j++){
+                if(yEnemigas[i][j] >= 530){
+                    vivas[i][j] = 0;
+                }
+                
+                if(vivas[i][j] == 1){
+                    return 1;
+                }
+            }
+        }
+        gameOver();
+        return 1;
+    }
+    
+    public void gameOver(){
+        g2.drawString("Game Over\nPresione Enter para continuar\n", 100, 200);
+        t.stop();
+        enemigas.stop();
     }
     
     @Override
@@ -122,15 +158,17 @@ public class JuegoPanel extends JPanel implements KeyListener {
             g2.fill(disparos[i]);
         }
         escribir();
+        interseccionBalas();
+        revisarVivas();
         inicializarEnemigas();
     }
     
     public void escribir(){
         g2.setFont(new Font("Tahoma", Font.BOLD, 16));
-        g2.drawString("Vidas:  ", 20, 20);
-        g2.drawString("Nivel:  ", 150, 20);
-        g2.drawString("Score:  ", 260, 20);
-        g2.drawString("Balas:  ", 370, 20);
+        g2.drawString("Vidas:  "+vidas, 20, 20);
+        g2.drawString("Nivel:  "+nivel, 150, 20);
+        g2.drawString("Score:  "+score, 260, 20);
+        g2.drawString("Balas:  "+balas, 370, 20);
     }
     
     public void timerEnemigas(){
@@ -215,7 +253,9 @@ public class JuegoPanel extends JPanel implements KeyListener {
         
         if(e.getKeyCode() == KeyEvent.VK_R ) {
             System.out.println("Recargandos");
-            contadorRecargar = 0;
+            if(contadorRecargar == 5){
+                contadorRecargar = 0;   
+            }
         }
     }
 
