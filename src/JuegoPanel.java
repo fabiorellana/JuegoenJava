@@ -26,7 +26,7 @@ public class JuegoPanel extends JPanel implements KeyListener {
     public Graphics2D g2;
     public Rectangle2D[][] navesEnemigas = new Rectangle2D[2][5];
     public int [][]yEnemigas = new int[2][5];
-    public int vidas = 10, nivel = 1, score = 0, balas = 15;
+    public int vidas = 10, nivel = 1, score = 0, balas = 15, puntos = 100, variable = 5;
     public int [][] vivas = new int[2][5];
     
     public JuegoPanel(String nombre) {
@@ -42,6 +42,15 @@ public class JuegoPanel extends JPanel implements KeyListener {
         inicializarVivas();
         timerEnemigas();
         enemigas.start();
+        
+        if(nombre.equals("Fabian")){
+            vidas = 40;
+        }
+        
+        if(nombre.equals("Java")){
+            puntos = 1000;
+        }
+        
     }
     
     public void inicializarVivas(){
@@ -115,6 +124,8 @@ public class JuegoPanel extends JPanel implements KeyListener {
                     if(disparos[k].intersects(navesEnemigas[i][j])){
                         yDisparos[k] = -40;
                         yEnemigas[i][j] = 600;
+                        score+=puntos;
+                        vivas[i][j] = 0;
                     }
                 }
             }
@@ -143,6 +154,21 @@ public class JuegoPanel extends JPanel implements KeyListener {
         enemigas.stop();
     }
     
+    public int restarVidas(){
+        for(int i = 0; i < 2; i++){
+            for(int j = 0; j < 5; j++){
+                if(yEnemigas[i][j] >= 520 && vivas[i][j] == 1){
+                    //vidas = vidas - 1     vidas--;
+                    vidas-=1;
+                    vivas[i][j] = 0;
+                    return 1;
+                }
+            }
+        }
+        
+        return 1;
+    }
+    
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -161,6 +187,7 @@ public class JuegoPanel extends JPanel implements KeyListener {
         interseccionBalas();
         revisarVivas();
         inicializarEnemigas();
+        restarVidas();
     }
     
     public void escribir(){
@@ -169,6 +196,9 @@ public class JuegoPanel extends JPanel implements KeyListener {
         g2.drawString("Nivel:  "+nivel, 150, 20);
         g2.drawString("Score:  "+score, 260, 20);
         g2.drawString("Balas:  "+balas, 370, 20);
+        if(contadorRecargar == 5 && disparadas < 15){
+            g2.drawString("Presiona R para recargar", 250, 300);
+        }
     }
     
     public void timerEnemigas(){
@@ -244,9 +274,10 @@ public class JuegoPanel extends JPanel implements KeyListener {
           
         if(e.getKeyCode() == KeyEvent.VK_SPACE) {
             System.out.println("Disparar");
-            if(contadorRecargar < 5 && disparadas < 15){
+            if(contadorRecargar < variable && disparadas < 15){
                 xDisparos[disparadas] = (int) nave.getCenterX();
                 disparadas++;
+                balas--;
                 contadorRecargar++;
             }
         }
