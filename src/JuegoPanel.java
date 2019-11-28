@@ -22,12 +22,13 @@ public class JuegoPanel extends JPanel implements KeyListener {
     public int [] xDisparos = new int[15];
     public int [] yDisparos = new int[15];
     public boolean derechaNave=false, izquierdaNave=true, derechaEnemigas=true, izquierdaEnemigas=false, segundaFila=false;
-    public boolean caer=false;
+    public boolean caer=false, acabado=false, fin=false;
     public Graphics2D g2;
     public Rectangle2D[][] navesEnemigas = new Rectangle2D[2][5];
     public int [][]yEnemigas = new int[2][5];
     public int vidas = 10, nivel = 1, score = 0, balas = 15, puntos = 100, variable = 5;
     public int [][] vivas = new int[2][5];
+    public int tiempoNave = 15, tiempoEnemigas = 90;
     
     public JuegoPanel(String nombre) {
         this.setBackground(Color.WHITE);
@@ -96,7 +97,7 @@ public class JuegoPanel extends JPanel implements KeyListener {
     }
     
     public void timerNave(){
-        t = new Timer(10, new ActionListener(){
+        t = new Timer(tiempoNave, new ActionListener(){
             public void actionPerformed(ActionEvent e){
                 if(derechaNave && xNave <= 440){
                     xNave+=5;
@@ -149,6 +150,7 @@ public class JuegoPanel extends JPanel implements KeyListener {
     }
     
     public void gameOver(){
+        acabado = true;
         g2.drawString("Game Over\nPresione Enter para continuar\n", 100, 200);
         t.stop();
         enemigas.stop();
@@ -183,6 +185,12 @@ public class JuegoPanel extends JPanel implements KeyListener {
             disparos[i] = new Ellipse2D.Double(xDisparos[i], yDisparos[i], 10, 20);
             g2.fill(disparos[i]);
         }
+        
+        if(vidas == 0){
+           fin = true;
+           t.stop();
+           enemigas.stop();
+        }
         escribir();
         interseccionBalas();
         revisarVivas();
@@ -199,10 +207,13 @@ public class JuegoPanel extends JPanel implements KeyListener {
         if(contadorRecargar == 5 && disparadas < 15){
             g2.drawString("Presiona R para recargar", 250, 300);
         }
+        if(fin){
+            g2.drawString("Perdiste presiona F para reiniciar", 200, 300);
+        }
     }
     
     public void timerEnemigas(){
-        enemigas = new Timer(90, new ActionListener(){
+        enemigas = new Timer(tiempoEnemigas, new ActionListener(){
             public void actionPerformed(ActionEvent e){
                 if(derechaEnemigas){
                     moviEnemigas+=5;
@@ -229,6 +240,7 @@ public class JuegoPanel extends JPanel implements KeyListener {
                     for(int j = 0; j < 5; j++){
                         if(nave.intersects(navesEnemigas[i][j])){
                             System.out.println("Has perdido!!");
+                            fin = true;
                             t.stop();
                             enemigas.stop();
                         }
@@ -255,6 +267,56 @@ public class JuegoPanel extends JPanel implements KeyListener {
         }
         repaint();
     }
+    
+    public void reiniciar(){
+        nivel+=1;
+        puntos+=100;
+        balas = 15;
+        disparadas = 0;
+        segundaFila = false;
+        contadorRecargar = 0;
+        contadorCaer = 0;
+        caer = false;
+        fin = false;
+        acabado = false;
+        inicializarDisparos();
+        inicializarAltura();
+        inicializarVivas();
+        timerNave();
+        t.start();
+        enemigas.start();
+        
+        if(nivel%2==0 && tiempoNave >= 2){
+            tiempoNave--;
+        }
+        
+        if(tiempoEnemigas >= 9){
+            tiempoEnemigas-=8;
+        }
+    }
+    
+        public void derrota(){
+        nivel = 1;
+        puntos = 100;
+        score = 0;
+        balas = 15;
+        disparadas = 0;
+        segundaFila = false;
+        contadorRecargar = 0;
+        contadorCaer = 0;
+        caer = false;
+        fin = false;
+        acabado = false;
+        inicializarDisparos();
+        inicializarAltura();
+        inicializarVivas();
+        timerNave();
+        t.start();
+        enemigas.start();
+        tiempoNave = 15;
+        tiempoEnemigas = 90;
+    }
+
 
     @Override
     public void keyTyped(KeyEvent e) {
@@ -287,6 +349,14 @@ public class JuegoPanel extends JPanel implements KeyListener {
             if(contadorRecargar == 5){
                 contadorRecargar = 0;   
             }
+        }
+        
+        if(e.getKeyCode() == KeyEvent.VK_ENTER && acabado == true ) {
+            reiniciar();
+        }
+        
+        if(e.getKeyCode() == KeyEvent.VK_F && fin == true ) {
+            derrota();
         }
     }
 
