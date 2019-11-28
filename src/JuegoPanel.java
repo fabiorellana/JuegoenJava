@@ -3,12 +3,18 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
+import java.io.File;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.imageio.ImageIO;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 
@@ -29,6 +35,9 @@ public class JuegoPanel extends JPanel implements KeyListener {
     public int vidas = 10, nivel = 1, score = 0, balas = 15, puntos = 100, variable = 5;
     public int [][] vivas = new int[2][5];
     public int tiempoNave = 15, tiempoEnemigas = 90;
+    public Image espacio, naveImagen;
+    public Image []balasImagen = new Image[15];
+    public Image [][]imagenEnemiga = new Image[2][5];
     
     public JuegoPanel(String nombre) {
         this.setBackground(Color.WHITE);
@@ -36,6 +45,22 @@ public class JuegoPanel extends JPanel implements KeyListener {
         this.setBounds(300, 100, 500, 500);
         this.setPreferredSize(new Dimension(500, 500));
         this.addKeyListener(this);
+        
+        try {
+            espacio = ImageIO.read(new File("espacio3.png"));
+            naveImagen = ImageIO.read(new File("navephotoshop.png"));
+            for(int i = 0; i < 15; i++){
+                balasImagen[i] = ImageIO.read(new File("balaphotoshop.png"));
+            }
+            for(int i = 0; i < 2; i++){
+                for(int j = 0; j < 5; j++){
+                    imagenEnemiga[i][j] = ImageIO.read(new File("enemigas.png"));
+                }
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(JuegoPanel.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
         timerNave();
         t.start();
         inicializarDisparos();
@@ -175,15 +200,16 @@ public class JuegoPanel extends JPanel implements KeyListener {
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
         g2 = (Graphics2D)g;
-        g2.setColor(Color.BLACK);
-        
+        g2.drawImage(espacio, 0, 0 , 500, 500, this);
+        g2.setColor(Color.WHITE);
         nave = new Rectangle2D.Double(xNave, 410, 60, 90);
-        g2.fill(nave);
-        
+        //g2.fill(nave);
+        g2.drawImage(naveImagen, xNave-5,410,80,105, this);
         //Dibujar balas
         for(int i = 0; i < disparadas; i++){
             disparos[i] = new Ellipse2D.Double(xDisparos[i], yDisparos[i], 10, 20);
-            g2.fill(disparos[i]);
+            //g2.fill(disparos[i]);
+            g2.drawImage(balasImagen[i], xDisparos[i], yDisparos[i], 15, 20, this);
         }
         
         if(vidas == 0){
@@ -259,8 +285,9 @@ public class JuegoPanel extends JPanel implements KeyListener {
         for(int filas = 0; filas < 2; filas++){
             for(int columnas = 0; columnas < 5; columnas++){
                 navesEnemigas[filas][columnas] = new Rectangle2D.Double(enemigasIni+enemigasAumentoX+moviEnemigas, yEnemigas[filas][columnas]+10, 60, 90);
+                g2.drawImage(imagenEnemiga[filas][columnas], enemigasIni+enemigasAumentoX+moviEnemigas, yEnemigas[filas][columnas]+10, 80, 100, this);
                 enemigasAumentoX+=80;
-                g2.fill(navesEnemigas[filas][columnas]);
+                //g2.fill(navesEnemigas[filas][columnas]);
             }
             enemigasAumentoX = 0;
             enemigasAumentoY = 100;
